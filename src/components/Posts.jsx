@@ -5,6 +5,7 @@ import Form from "./Form";
 const Posts = () => {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [editingPost, setEditingPost] = useState(null);
 
     const fetchData = async () => {
         try {
@@ -37,13 +38,17 @@ const Posts = () => {
         }
     };
 
+    const handleEdit = (post) => {
+        setEditingPost(post);
+    };
+
     if (loading) return <p>Loading...</p>;
 
 
     return (
         <>
             <section data={data} setData={setData}>
-                <Form setData={setData} />
+                <Form setData={setData} editingPost={editingPost} setEditingPost={setEditingPost} />
 
             </section>
             <section className="max-w-4xl mx-auto p-6">
@@ -54,7 +59,7 @@ const Posts = () => {
                             <p className="text-gray-600 mb-4">{body}</p>
 
                             <div className="flex gap-2">
-                                <button className="px-4 py-2 bg-blue-500 text-white rounded">
+                                <button className="px-4 py-2 bg-blue-500 text-white rounded" onClick={() => handleEdit({ id, title, body })}>
                                     Edit
                                 </button>
 

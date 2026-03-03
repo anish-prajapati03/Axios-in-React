@@ -1,25 +1,41 @@
 import axios from 'axios';
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { updatePost } from '../services/api';
 
-const Form = ({ setData }) => {
+const Form = ({ setData, editingPost, setEditingPost }) => {
     const [addData, setAddData] = useState({
         title: "",
         body: ""
     });
 
+    useEffect(() => {
+        if (editingPost) {
+            setAddData({ title: editingPost.title, body: editingPost.body });
+        }
+    }, [editingPost]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            const response = await axios.post(
-                "https://jsonplaceholder.typicode.com/posts",
-                addData
-            );
-            console.log("Post created:", response.data);
-            setData((prevData) => [response.data, ...prevData]);
+            if (editingPost) {
+                const response = await updatePost(editingPost.id, addData);
+                setData((prevData) => 
+                    prevData.map((post) => 
+                        post.id === editingPost.id ? response.data : post
+                    )
+                );
+                setEditingPost(null);
+            } else {
+                const response = await axios.post(
+                    "https://jsonplaceholder.typicode.com/posts",
+                    addData
+                );
+                setData((prevData) => [response.data, ...prevData]);
+            }
             setAddData({ title: "", body: "" });
         } catch (error) {
-            console.error("Error creating post:", error);
+            console.error("Error:", error);
         }
     };
     return (
@@ -29,7 +45,7 @@ const Form = ({ setData }) => {
                 className="bg-white p-6 rounded-lg shadow-md w-full max-w-md"
             >
                 <h2 className="text-2xl font-semibold mb-4 text-center">
-                    Add Post
+                    {editingPost ? "Edit Post" : "Add Post"}
                 </h2>
 
 
@@ -69,7 +85,7 @@ const Form = ({ setData }) => {
                     type="submit"
                     className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition duration-200"
                 >
-                    ADD
+                    {editingPost ? "UPDATE" : "ADD"}
                 </button>
             </form>
         </div>
